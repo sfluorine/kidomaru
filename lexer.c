@@ -191,10 +191,27 @@ Token lexer_gettok(Lexer* lexer) {
         advance(lexer); // skip '"'
         size_t length = 0;
 
-        do {
-            length++;
-            advance(lexer);
-        } while (!is_eof(lexer) && current(lexer) != '"');
+        while (!is_eof(lexer) && current(lexer) != '"') {
+            if (current(lexer) == '\\') {
+                length++;
+                advance(lexer);
+
+                switch(current(lexer)) {
+                case '"':
+                    length++;
+                    advance(lexer);
+                    break;
+                default:
+                    fprintf(stderr, "(%zu:%zu) WARNING: invalid escape character: '%c'\n", curr_line, curr_col, current(lexer));
+                    length++;
+                    advance(lexer);
+                    break;
+                }
+            } else {
+                length++;
+                advance(lexer);
+            }
+        }
 
         Span span = span_init(curr_input + 1, length);
 
