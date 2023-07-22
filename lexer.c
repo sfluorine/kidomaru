@@ -3,7 +3,6 @@
 #include "lexer.h"
 
 static char current(Lexer* lexer);
-static char peek(Lexer* lexer);
 static int is_eof(Lexer* lexer);
 
 static void advance(Lexer* lexer);
@@ -142,6 +141,9 @@ Token lexer_gettok(Lexer* lexer) {
         if (span_equals(span, span_from("let")))
             return token_init(TOK_LET, span, curr_line, curr_col);
 
+        if (span_equals(span, span_from("fn")))
+            return token_init(TOK_FN, span, curr_line, curr_col);
+
         if (span_equals(span, span_from("return")))
             return token_init(TOK_RETURN, span, curr_line, curr_col);
 
@@ -201,8 +203,12 @@ Token lexer_gettok(Lexer* lexer) {
                     length++;
                     advance(lexer);
                     break;
+                case '\\':
+                    length++;
+                    advance(lexer);
+                    break;
                 default:
-                    fprintf(stderr, "(%zu:%zu) WARNING: invalid escape character: '%c'\n", curr_line, curr_col, current(lexer));
+                    fprintf(stderr, "(%zu:%zu) WARNING: invalid escape character: '\\%c'\n", curr_line, curr_col, current(lexer));
                     length++;
                     advance(lexer);
                     break;
@@ -239,10 +245,6 @@ Token lexer_gettok(Lexer* lexer) {
 
 static char current(Lexer* lexer) {
     return *lexer->input;
-}
-
-static char peek(Lexer* lexer) {
-    return *(lexer->input + 1);
 }
 
 static int is_eof(Lexer* lexer) {
