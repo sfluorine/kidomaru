@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "lexer.h"
+#include "ast.h"
 
 typedef struct Parser_t {
     Lexer* lexer;
@@ -9,5 +10,7 @@ typedef struct Parser_t {
 } Parser;
 
 Parser parser_init(Lexer* lexer);
+
+void parse_expression(Parser* parser);
 
 #endif /* PARSER_H */
