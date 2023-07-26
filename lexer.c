@@ -126,6 +126,15 @@ Token lexer_gettok(Lexer* lexer) {
 
         Span span = span_init(curr_input, length);
 
+        if (span_equals(span, span_from("true")))
+            return token_init(TOK_BOOLTRUE, span, curr_line, curr_col);
+
+        if (span_equals(span, span_from("false")))
+            return token_init(TOK_BOOLFALSE, span, curr_line, curr_col);
+
+        if (span_equals(span, span_from("i64")))
+            return token_init(TOK_TYPEI64, span, curr_line, curr_col);
+
         if (span_equals(span, span_from("i64")))
             return token_init(TOK_TYPEI64, span, curr_line, curr_col);
 
