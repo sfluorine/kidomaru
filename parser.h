@@ -13,6 +13,6 @@ typedef struct Parser_t {
 
 Parser parser_init(Lexer* lexer);
 
-void parse_expression(Parser* parser, TokenKind delim, size_t prec);
+VarDecl parse_vardecl(Parser* parser);
 
 #endif /* PARSER_H */

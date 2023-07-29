@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "parser.h"
 
 #define ERR_FILE_EMPTY (char*)0xDEADBEEF
 #define ERR_FILE_MISREAD (char*)0xBEEFDEAD /* NOTE: this error name is kinda misleading. this error will yield when num of read bytes is not equal to ftell's size. */
@@ -27,20 +28,10 @@ int main(int argc, char** argv) {
         return 0;
 
     Lexer lexer = lexer_init(file_contents);
+    Parser parser = parser_init(&lexer);
 
-    Token token = lexer_gettok(&lexer);
-
-    while (token.kind != TOK_EOF) {
-        
-        if (token.kind == TOK_GARBAGE)
-            printf("garbage: ");
-
-        printf("%zu:%zu: ", token.line, token.col);
-        span_print(stdout, token.span);
-        printf("\n");
-
-        token = lexer_gettok(&lexer);
-    }
+    VarDecl variable = parse_vardecl(&parser);
+    vardecl_deinit(&variable);
 
     free(file_contents);
 

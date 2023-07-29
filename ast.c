@@ -3,18 +3,24 @@
 #include "ast.h"
 
 void value_deinit(Value* value) {
-    if (value->kind != VALUE_STRING)
+    if (value->kind != VAL_STRING)
         return;
 
-    free(value->string);
+    free(value->String.data);
 }
 
 void expr_deinit(Expr* expr) {
     if (expr->kind == EXPR_PRIMARY) {
         value_deinit(&expr->Primary);
-        return;
-    }
+        free(expr);
+    } else {
+        expr_deinit(expr->Binary.lhs); 
+        expr_deinit(expr->Binary.rhs);
 
-    expr_deinit(expr->Binary.lhs);
-    expr_deinit(expr->Binary.rhs);
+        free(expr);
+    }
+}
+
+void vardecl_deinit(VarDecl* vardecl) {
+    expr_deinit(vardecl->expr);
 }

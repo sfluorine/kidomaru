@@ -1,10 +1,3 @@
-add(x: f64, y: f64) -> f64 {
-    return x + y;
-}
-
-let var_x: f64 = 69.0;
-let var_y: f64 = 0.420;
-
-let var_nice: f64 = add(var_x, var_y);
-
-let some_string: string = "hello world!";
+let x: i64 = 34;
+let y: i64 = 35;
+let nice: i64 = 34 + 35;

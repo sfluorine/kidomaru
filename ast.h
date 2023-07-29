@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "lexer.h"
+
 typedef enum ValueKind_t {
     VAL_INT,
     VAL_DOUBLE,
@@ -17,7 +19,10 @@ typedef struct Value_t {
         int64_t i64;
         double f64;
         int bool;
-        char* string;
+        struct {
+            char* data;
+            size_t size;
+        } String;
     };
 } Value;
 
@@ -45,5 +50,13 @@ struct Expr_t {
 };
 
 void expr_deinit(Expr* expr);
+
+typedef struct VarDecl_t {
+    Span id;
+    ValueKind type;
+    Expr* expr;
+} VarDecl;
+
+void vardecl_deinit(VarDecl* vardecl);
 
 #endif /* AST_H */

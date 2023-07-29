@@ -1,4 +1,6 @@
 #include <ctype.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #include "lexer.h"
 
@@ -192,8 +194,31 @@ Token lexer_gettok(Lexer* lexer) {
             return token_init(TOK_GARBAGE, span, curr_line, curr_col);
         }
 
-        if (is_double)
+        if (is_double) {
+            strtod(span.data, NULL);
+
+            if (errno == ERANGE) {
+                fprintf(stderr, "(%zu:%zu) WARNING: floating point number too large\n", curr_line, curr_col);
+                fprintf(stderr, "-> ");
+                span_print(stderr, span);
+                fprintf(stderr, "\n");
+
+                return token_init(TOK_GARBAGE, span, curr_line, curr_col);
+            }
+
             return token_init(TOK_DOUBLELITERAL, span, curr_line, curr_col);
+        }
+
+        strtol(span.data, NULL, 10);
+
+        if (errno == ERANGE) {
+            fprintf(stderr, "(%zu:%zu) WARNING: integer number too large\n", curr_line, curr_col);
+            fprintf(stderr, "-> ");
+            span_print(stderr, span);
+            fprintf(stderr, "\n");
+
+            return token_init(TOK_GARBAGE, span, curr_line, curr_col);
+        }
 
         return token_init(TOK_INTLITERAL, span, curr_line, curr_col);
     }
@@ -235,6 +260,8 @@ Token lexer_gettok(Lexer* lexer) {
             fprintf(stderr, "-> ");
             span_print(stderr, span);
             fprintf(stderr, "\n");
+
+            return token_init(TOK_GARBAGE, span_init(curr_input, length), curr_line, curr_col);
         }
 
         advance(lexer); // skip '"'
