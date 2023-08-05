@@ -181,6 +181,14 @@ static Expr* parse_primary(Parser* parser) {
         };
 
         break;
+    case TOK_IDENTIFIER:
+        expr->kind = EXPR_PRIMARY;
+        expr->Primary = (Value) {
+            .kind = VAL_IDENT,
+            .span = parser->current.span,
+        };
+
+        break;
     default:
         fprintf(stderr, "(%zu:%zu) ERROR: expected value but got %s\n", parser->current.line, parser->current.col, token_stringified[parser->current.kind]);
         exit(1);

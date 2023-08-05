@@ -10,6 +10,7 @@ typedef enum ValueKind_t {
     VAL_DOUBLE,
     VAL_BOOL,
     VAL_STRING,
+    VAL_IDENT,
 } ValueKind;
 
 typedef struct Value_t {
@@ -23,6 +24,7 @@ typedef struct Value_t {
             char* data;
             size_t size;
         } String;
+        Span span;
     };
 } Value;
 
