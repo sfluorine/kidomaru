@@ -61,4 +61,18 @@ typedef struct VarDecl_t {
 
 void vardecl_deinit(VarDecl* vardecl);
 
+typedef enum AstKind_t {
+    AST_VAR_DECL,
+} AstKind;
+
+typedef struct Ast_t {
+    AstKind kind;
+
+    union {
+        VarDecl vardecl;
+    };
+} Ast;
+
+void ast_deinit(Ast* ast);
+
 #endif /* AST_H */

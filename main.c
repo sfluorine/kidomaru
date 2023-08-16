@@ -30,8 +30,8 @@ int main(int argc, char** argv) {
     Lexer lexer = lexer_init(file_contents);
     Parser parser = parser_init(&lexer);
 
-    VarDecl variable = parse_vardecl(&parser);
-    vardecl_deinit(&variable);
+    Ast* ast = parse_statement(&parser);
+    ast_deinit(ast);
 
     free(file_contents);
 

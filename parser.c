@@ -52,6 +52,8 @@ static void match(Parser* parser, TokenKind kind);
 static Expr* parse_primary(Parser* parser);
 static Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec);
 
+static VarDecl parse_vardecl(Parser* parser);
+
 static ValueKind parse_type(Parser* parser);
 
 Parser parser_init(Lexer* lexer) {
@@ -61,30 +63,24 @@ Parser parser_init(Lexer* lexer) {
     };
 }
 
-VarDecl parse_vardecl(Parser* parser) {
-    VarDecl vardecl;
+Ast* parse_statement(Parser* parser) {
+    Ast* statement = NULL;
 
-    match(parser, TOK_LET);
+    if (parser->current.kind == TOK_LET) {
+        statement = malloc(sizeof(Ast));
+        if (statement == NULL) {
+            fprintf(stderr, "ERROR: cannot allocate memory!\n");
+            exit(1);
+        }
 
-    Span id = parser->current.span;
+        statement->kind = AST_VAR_DECL;
+        statement->vardecl = parse_vardecl(parser);
 
-    match(parser, TOK_IDENTIFIER);
-
-    vardecl.id = id;
-
-    match(parser, TOK_COLON);
-
-    ValueKind type = parse_type(parser);
-    vardecl.type = type;
-
-    match(parser, TOK_EQUAL);
-
-    Expr* expr = parse_expression(parser, TOK_SEMICOLON, 0);
-    vardecl.expr = expr;
-
-    match(parser, TOK_SEMICOLON);
-
-    return vardecl;
+        return statement;
+    } else {
+        fprintf(stderr, "ERROR: expected let binding but got else!\n");
+        exit(1);
+    }
 }
 
 static int is_eof(Parser* parser) {
@@ -97,6 +93,7 @@ static int expect(Parser* parser, TokenKind kind) {
 
 static size_t get_prec(Token token) {
     switch (token.kind) {
+    case TOK_IDENTIFIER:
     case TOK_INTLITERAL:
     case TOK_DOUBLELITERAL:
     case TOK_BOOLTRUE:
@@ -199,7 +196,7 @@ static Expr* parse_primary(Parser* parser) {
     return expr;
 }
 
-Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec) {
+static Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec) {
     Expr* left = parse_primary(parser);
 
     Token curr_tok = parser->current;
@@ -249,6 +246,32 @@ Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec) {
     }
 
     return left;
+}
+
+static VarDecl parse_vardecl(Parser* parser) {
+    VarDecl vardecl;
+
+    match(parser, TOK_LET);
+
+    Span id = parser->current.span;
+
+    match(parser, TOK_IDENTIFIER);
+
+    vardecl.id = id;
+
+    match(parser, TOK_COLON);
+
+    ValueKind type = parse_type(parser);
+    vardecl.type = type;
+
+    match(parser, TOK_EQUAL);
+
+    Expr* expr = parse_expression(parser, TOK_SEMICOLON, 0);
+    vardecl.expr = expr;
+
+    match(parser, TOK_SEMICOLON);
+
+    return vardecl;
 }
 
 static ValueKind parse_type(Parser* parser) {

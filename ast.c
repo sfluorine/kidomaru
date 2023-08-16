@@ -24,3 +24,14 @@ void expr_deinit(Expr* expr) {
 void vardecl_deinit(VarDecl* vardecl) {
     expr_deinit(vardecl->expr);
 }
+
+void ast_deinit(Ast* ast) {
+    switch (ast->kind) {
+
+    case AST_VAR_DECL:
+        vardecl_deinit(&ast->vardecl);
+        break;
+    }
+
+    free(ast);
+}
