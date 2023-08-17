@@ -1,3 +1,5 @@
-let x: i64 = 34;
-let y: i64 = 35;
-let nice: i64 = 34 + 35;
+if (x + y) {
+    return "nice";
+} else {
+    return "not nice";
+}

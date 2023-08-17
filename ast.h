@@ -59,20 +59,43 @@ typedef struct VarDecl_t {
     Expr* expr;
 } VarDecl;
 
-void vardecl_deinit(VarDecl* vardecl);
+void var_decl_deinit(VarDecl* vardecl);
 
-typedef enum AstKind_t {
-    AST_VAR_DECL,
-} AstKind;
+struct BlockStatement_t;
 
-typedef struct Ast_t {
-    AstKind kind;
+typedef struct IfStatement_t {
+    Expr* expr;
+    struct BlockStatement_t* if_block; 
+    struct BlockStatement_t* else_block; 
+} IfStatement;
+
+void if_statement_deinit(IfStatement* ifstatement);
+
+typedef enum StatementKind_t {
+    STATEMENT_VAR_DECL,
+    STATEMENT_IF_STATEMENT,
+    STATEMENT_BLOCK_STATEMENT,
+    STATEMENT_RETURN,
+} StatementKind;
+
+typedef struct Statement_t {
+    StatementKind kind;
 
     union {
         VarDecl vardecl;
+        IfStatement ifstatement;
+        struct BlockStatement_t* blockstatement;
+        Expr* ret;
     };
-} Ast;
+} Statement;
 
-void ast_deinit(Ast* ast);
+void statement_deinit(Statement* statement);
+
+typedef struct BlockStatement_t {
+    Statement* statement;
+    struct BlockStatement_t* next;
+} BlockStatement;
+
+void block_statement_deinit(BlockStatement* blockstatement);
 
 #endif /* AST_H */

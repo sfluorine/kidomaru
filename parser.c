@@ -22,6 +22,8 @@ static const char* token_stringified[] = {
     "LET",
     "FN",
     "RETURN",
+    "IF",
+    "ELSE",
 
     "+",
     "-",
@@ -52,7 +54,9 @@ static void match(Parser* parser, TokenKind kind);
 static Expr* parse_primary(Parser* parser);
 static Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec);
 
-static VarDecl parse_vardecl(Parser* parser);
+static VarDecl parse_var_decl(Parser* parser);
+static IfStatement parse_if_statement(Parser* parser);
+static BlockStatement* parse_block_statement(Parser* parser);
 
 static ValueKind parse_type(Parser* parser);
 
@@ -63,24 +67,41 @@ Parser parser_init(Lexer* lexer) {
     };
 }
 
-Ast* parse_statement(Parser* parser) {
-    Ast* statement = NULL;
+Statement* parse_statement(Parser* parser) {
+    Statement* statement = malloc(sizeof(Statement));
 
-    if (parser->current.kind == TOK_LET) {
-        statement = malloc(sizeof(Ast));
-        if (statement == NULL) {
-            fprintf(stderr, "ERROR: cannot allocate memory!\n");
-            exit(1);
-        }
-
-        statement->kind = AST_VAR_DECL;
-        statement->vardecl = parse_vardecl(parser);
-
-        return statement;
-    } else {
-        fprintf(stderr, "ERROR: expected let binding but got else!\n");
+    if (statement == NULL) {
+        fprintf(stderr, "ERROR: cannot allocate memory!\n");
         exit(1);
     }
+
+    if (parser->current.kind == TOK_LET) {
+        statement->kind = STATEMENT_VAR_DECL;
+        statement->vardecl = parse_var_decl(parser);
+
+        return statement;
+    } 
+
+    if (parser->current.kind == TOK_IF) {
+        statement->kind = STATEMENT_IF_STATEMENT;
+        statement->ifstatement = parse_if_statement(parser);
+
+        return statement;
+    }
+
+    if (parser->current.kind == TOK_RETURN) {
+        advance(parser);
+
+        statement->kind = STATEMENT_RETURN;
+        statement->ret = parse_expression(parser, TOK_SEMICOLON, 0);
+
+        match(parser, TOK_SEMICOLON);
+
+        return statement;
+    }
+
+    fprintf(stderr, "(%zu:%zu) ERROR: expected statement but got %s!\n", parser->current.line, parser->current.col, token_stringified[parser->current.kind]);
+    exit(1);
 }
 
 static int is_eof(Parser* parser) {
@@ -248,7 +269,7 @@ static Expr* parse_expression(Parser* parser, TokenKind delim, size_t prec) {
     return left;
 }
 
-static VarDecl parse_vardecl(Parser* parser) {
+static VarDecl parse_var_decl(Parser* parser) {
     VarDecl vardecl;
 
     match(parser, TOK_LET);
@@ -272,6 +293,46 @@ static VarDecl parse_vardecl(Parser* parser) {
     match(parser, TOK_SEMICOLON);
 
     return vardecl;
+}
+
+static IfStatement parse_if_statement(Parser* parser) {
+    IfStatement ifstatement;
+
+    match(parser, TOK_IF);
+
+    match(parser, TOK_LPAREN);
+    Expr* expr = parse_expression(parser, TOK_RPAREN, 0);
+    match(parser, TOK_RPAREN);
+
+    ifstatement.expr = expr;
+    ifstatement.if_block = parse_block_statement(parser);
+
+    if (parser->current.kind == TOK_ELSE) {
+        advance(parser);
+
+        ifstatement.else_block = parse_block_statement(parser);
+        return ifstatement;
+    }
+
+    ifstatement.else_block = NULL;
+    return ifstatement;
+}
+
+static BlockStatement* parse_block_statement(Parser* parser) {
+    BlockStatement* blockstatement = malloc(sizeof(BlockStatement));
+    if (blockstatement == NULL) {
+        fprintf(stderr, "ERROR: cannot allocate memory!\n");
+        exit(1);
+    }
+
+    blockstatement->next = NULL;
+
+    match(parser, TOK_LBRACE);
+    blockstatement->statement = parse_statement(parser);
+    match(parser, TOK_RBRACE);
+
+
+    return blockstatement;
 }
 
 static ValueKind parse_type(Parser* parser) {

@@ -33,6 +33,8 @@ typedef enum TokenKind_t {
     TOK_LET,
     TOK_FN,
     TOK_RETURN,
+    TOK_IF,
+    TOK_ELSE,
 
     TOK_PLUS,
     TOK_MINUS,

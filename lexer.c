@@ -158,6 +158,12 @@ Token lexer_gettok(Lexer* lexer) {
         if (span_equals(span, span_from("return")))
             return token_init(TOK_RETURN, span, curr_line, curr_col);
 
+        if (span_equals(span, span_from("if")))
+            return token_init(TOK_IF, span, curr_line, curr_col);
+
+        if (span_equals(span, span_from("else")))
+            return token_init(TOK_ELSE, span, curr_line, curr_col);
+
         return token_init(TOK_IDENTIFIER, span, curr_line, curr_col);
     }
 
