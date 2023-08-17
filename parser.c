@@ -75,21 +75,21 @@ Statement* parse_statement(Parser* parser) {
         exit(1);
     }
 
-    if (parser->current.kind == TOK_LET) {
+    if (expect(parser, TOK_LET)) {
         statement->kind = STATEMENT_VAR_DECL;
         statement->vardecl = parse_var_decl(parser);
 
         return statement;
     } 
 
-    if (parser->current.kind == TOK_IF) {
+    if (expect(parser, TOK_IF)) {
         statement->kind = STATEMENT_IF_STATEMENT;
         statement->ifstatement = parse_if_statement(parser);
 
         return statement;
     }
 
-    if (parser->current.kind == TOK_RETURN) {
+    if (expect(parser, TOK_RETURN)) {
         advance(parser);
 
         statement->kind = STATEMENT_RETURN;
@@ -139,6 +139,11 @@ static void advance(Parser* parser) {
 }
 
 static void match(Parser* parser, TokenKind kind) {
+    if (!expect(parser, kind) && expect(parser, TOK_EOF)) {
+        fprintf(stderr, "(%zu:%zu) ERROR: unexpected eof!\n", parser->current.line, parser->current.col);
+        exit(1);
+    }
+
     if (!expect(parser, kind)) {
         fprintf(stderr, "(%zu:%zu) ERROR: expected %s but got %s\n", parser->current.line, parser->current.col, token_stringified[kind], token_stringified[parser->current.kind]);
         exit(1);
@@ -325,12 +330,24 @@ static BlockStatement* parse_block_statement(Parser* parser) {
         exit(1);
     }
 
-    blockstatement->next = NULL;
+    BlockStatement* ptr = blockstatement;
+    ptr->next = NULL;
 
     match(parser, TOK_LBRACE);
-    blockstatement->statement = parse_statement(parser);
-    match(parser, TOK_RBRACE);
 
+    while (!is_eof(parser)) {
+        ptr->statement = parse_statement(parser);
+
+        if (expect(parser, TOK_RBRACE)) {
+            ptr->next = NULL;
+            break;
+        }
+
+        ptr->next = malloc(sizeof(BlockStatement));
+        ptr = ptr->next;
+    }
+
+    match(parser, TOK_RBRACE);
 
     return blockstatement;
 }
