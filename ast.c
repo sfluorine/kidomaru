@@ -41,10 +41,10 @@ void statement_deinit(Statement* statement) {
     case STATEMENT_VAR_DECL:
         vardecl_deinit(&statement->vardecl);
         break;
-    case STATEMENT_IF_STATEMENT:
+    case STATEMENT_IF:
         if_statement_deinit(&statement->ifstatement);
         break;
-    case STATEMENT_BLOCK_STATEMENT:
+    case STATEMENT_BLOCK:
         block_statement_deinit(statement->blockstatement);
         break;
     case STATEMENT_RETURN:

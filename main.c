@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "interpreter.h"
 
 #define ERR_FILE_EMPTY (char*)0xDEADBEEF
 #define ERR_FILE_MISREAD (char*)0xBEEFDEAD /* NOTE: this error name is kinda misleading. this error will yield when num of read bytes is not equal to ftell's size. */
@@ -30,8 +31,12 @@ int main(int argc, char** argv) {
     Lexer lexer = lexer_init(file_contents);
     Parser parser = parser_init(&lexer);
 
-    Statement* statement = parse_statement(&parser);
-    statement_deinit(statement);
+    
+    Statement* root = parse_statement(&parser);
+    Interpreter interpreter = interpreter_init(root);
+
+    interpreter_begin(&interpreter);
+    interpreter_deinit(&interpreter);
 
     free(file_contents);
 

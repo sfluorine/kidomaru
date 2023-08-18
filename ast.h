@@ -73,8 +73,8 @@ void if_statement_deinit(IfStatement* ifstatement);
 
 typedef enum StatementKind_t {
     STATEMENT_VAR_DECL,
-    STATEMENT_IF_STATEMENT,
-    STATEMENT_BLOCK_STATEMENT,
+    STATEMENT_IF,
+    STATEMENT_BLOCK,
     STATEMENT_RETURN,
 } StatementKind;
 

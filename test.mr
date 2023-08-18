@@ -1,15 +1,4 @@
-if (x + y) {
-    let x: i64 = 34;
-    let y: i64 = 35;
-    let nice: i64 = x + y;
-
-
-
-
-
-
-
-
-
-
-    return nice;
+{ 
+    let x: bool = true;
+    let y: bool = false;
+}

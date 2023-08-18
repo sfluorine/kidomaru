@@ -149,11 +149,11 @@ Token lexer_gettok(Lexer* lexer) {
         if (span_equals(span, span_from("string")))
             return token_init(TOK_TYPESTRING, span, curr_line, curr_col);
 
-        if (span_equals(span, span_from("let")))
-            return token_init(TOK_LET, span, curr_line, curr_col);
-
         if (span_equals(span, span_from("fn")))
             return token_init(TOK_FN, span, curr_line, curr_col);
+
+        if (span_equals(span, span_from("let")))
+            return token_init(TOK_LET, span, curr_line, curr_col);
 
         if (span_equals(span, span_from("return")))
             return token_init(TOK_RETURN, span, curr_line, curr_col);

@@ -19,8 +19,8 @@ static const char* token_stringified[] = {
     "BOOL FALSE",
     "STRING LITERAL",
 
-    "LET",
     "FN",
+    "LET",
     "RETURN",
     "IF",
     "ELSE",
@@ -83,7 +83,7 @@ Statement* parse_statement(Parser* parser) {
     } 
 
     if (expect(parser, TOK_IF)) {
-        statement->kind = STATEMENT_IF_STATEMENT;
+        statement->kind = STATEMENT_IF;
         statement->ifstatement = parse_if_statement(parser);
 
         return statement;
@@ -100,7 +100,14 @@ Statement* parse_statement(Parser* parser) {
         return statement;
     }
 
-    fprintf(stderr, "(%zu:%zu) ERROR: expected statement but got %s!\n", parser->current.line, parser->current.col, token_stringified[parser->current.kind]);
+    if (expect(parser, TOK_LBRACE)) {
+        statement->kind = STATEMENT_BLOCK;
+        statement->blockstatement = parse_block_statement(parser);
+
+        return statement;
+    }
+
+    fprintf(stderr, "(%zu:%zu) ERROR: expected statement but got %s\n", parser->current.line, parser->current.col, token_stringified[parser->current.kind]);
     exit(1);
 }
 
@@ -331,20 +338,24 @@ static BlockStatement* parse_block_statement(Parser* parser) {
     }
 
     BlockStatement* ptr = blockstatement;
-    ptr->next = NULL;
 
     match(parser, TOK_LBRACE);
 
     while (!is_eof(parser)) {
-        ptr->statement = parse_statement(parser);
-
         if (expect(parser, TOK_RBRACE)) {
             ptr->next = NULL;
             break;
         }
 
+        ptr->statement = parse_statement(parser);
+
         ptr->next = malloc(sizeof(BlockStatement));
         ptr = ptr->next;
+
+        if (expect(parser, TOK_RBRACE)) {
+            ptr->next = NULL;
+            break;
+        }
     }
 
     match(parser, TOK_RBRACE);
